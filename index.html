@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SneakerVault</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>SneakerVault</header>
+  <div class="filter-box">
+    <select id="category">
+      <option value="">Select Category</option>
+      <option value="casual">Casual</option>
+      <option value="basketball">Basketball</option>
+      <option value="soccer">Soccer</option>
+    </select>
+    <select id="brand">
+      <option value="">Select Brand</option>
+      <option value="nike">Nike</option>
+      <option value="adidas">Adidas</option>
+      <option value="reebok">Reebok</option>
+      <option value="newbalance">New Balance</option>
+    </select>
+    <button onclick="searchShoes()">Search</button>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modal-content"></div>
+    <button class="close-btn" onclick="closeModal()">Close</button>
+  </div>
+
+  <script src="code.js"></script>
+</body>
+</html>
