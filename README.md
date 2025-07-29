@@ -21,7 +21,7 @@
 SneakerVault/
 ├── index.html          # Main HTML file
 ├── style.css           # CSS styles
-├── script.js           # JavaScript functionality
+├── code.js           # JavaScript functionality
 └── README.md           # Project overview
 ```
 
