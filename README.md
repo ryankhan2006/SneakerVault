@@ -29,7 +29,7 @@ SneakerVault/
 
 1. Clone or download the repo:
    ```bash
-   git clone https://github.com/your-username/SneakerVault.git
+   git clone https://github.com/ryankhan2006/SneakerVault.git
    ```
 
 2. Open `index.html` in your browser to run locally.
