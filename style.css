@@ -110,3 +110,51 @@ button:hover {
 .close-btn:hover {
   background-color: #005fcc;
 }
+
+body.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+body.dark-mode header {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+body.dark-mode .filter-box {
+  background-color: #1c1c1c;
+}
+
+body.dark-mode .shoe-card {
+  background-color: #2a2a2a;
+  color: white;
+}
+
+body.dark-mode .modal-content {
+  background-color: #2b2b2b;
+  color: white;
+}
+
+.theme-toggle {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background-color: #666;
+  color: #fff;
+}
+
+body, .filter-box, .shoe-card, .modal-content, header {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.rotate {
+  animation: spin 0.3s ease-in-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
