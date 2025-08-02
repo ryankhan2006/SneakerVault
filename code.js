@@ -1,3 +1,4 @@
+// Sneaker data with category, brand, audience, and price
 const shoeData = [
   {
     name: 'Nike Air Force 1',
@@ -145,7 +146,7 @@ function showWishlist() {
       <h3>${shoe.name}</h3>
       <p>$${shoe.price}</p>
       <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.name}')">
-        ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
+        <span class="heart ${isInWishlist(shoe.name) ? 'active' : ''}">${isInWishlist(shoe.name) ? '❤️' : '🤍'}</span>
       </button>
     `;
     card.onclick = () => showDetails(shoe);
@@ -175,6 +176,9 @@ window.onload = () => {
   const body = document.body;
   const savedTheme = localStorage.getItem('theme');
 
+  // Clear wishlist on page load
+  localStorage.removeItem('wishlist');
+
   if (savedTheme === 'dark') {
     body.classList.add('dark-mode');
   }
@@ -185,11 +189,20 @@ window.onload = () => {
   toggleBtn.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
   toggleBtn.onclick = toggleTheme;
 
+  const wishlistIcon = document.createElement('button');
+  wishlistIcon.className = 'wishlist-toggle';
+  wishlistIcon.textContent = '💖';
+  wishlistIcon.title = 'View Wishlist';
+  wishlistIcon.onclick = showWishlist;
+
   const wrapper = document.createElement('div');
   wrapper.style.position = 'absolute';
   wrapper.style.top = '10px';
   wrapper.style.right = '10px';
+  wrapper.style.display = 'flex';
+  wrapper.style.gap = '10px';
   wrapper.appendChild(toggleBtn);
+  wrapper.appendChild(wishlistIcon);
 
   document.body.appendChild(wrapper);
 };
