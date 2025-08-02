@@ -1,4 +1,3 @@
-// Array of sneaker objects with details for each shoe
 const shoeData = [
   {
     name: 'Nike Air Force 1',
@@ -6,7 +5,7 @@ const shoeData = [
     brand: 'Nike',
     audience: 'Men',
     price: 100,
-    image: '',
+    image: '', // Add actual image URLs
     description: 'Classic and clean casual sneaker perfect for everyday wear.'
   },
   {
@@ -47,36 +46,31 @@ const shoeData = [
   }
 ];
 
-// Function to filter and sort sneakers based on selected category, brand, audience, and price
 function searchShoes() {
   const category = document.getElementById('category').value;
   const brand = document.getElementById('brand').value;
-  const audience = document.getElementById('audience')?.value;
-  const sort = document.getElementById('sort')?.value;
+  const audience = document.getElementById('audience').value;
+  const sort = document.getElementById('sort').value;
   const results = document.getElementById('results');
-  results.innerHTML = ''; // Clear previous results
+  results.innerHTML = '';
 
-  // Filter shoes by matching category, brand, and audience
   let filtered = shoeData.filter(shoe => {
     return (!category || shoe.category === category) &&
            (!brand || shoe.brand === brand) &&
            (!audience || shoe.audience === audience);
   });
 
-  // Sort based on price if selected
   if (sort === 'Low-High') {
     filtered.sort((a, b) => a.price - b.price);
   } else if (sort === 'High-Low') {
     filtered.sort((a, b) => b.price - a.price);
   }
 
-  // If no shoes match the filters, display message
   if (filtered.length === 0) {
     results.innerHTML = '<p>No sneakers found for selected filters.</p>';
     return;
   }
 
-  // Create and display a card for each matching shoe
   filtered.forEach(shoe => {
     const card = document.createElement('div');
     card.className = 'shoe-card';
@@ -84,13 +78,15 @@ function searchShoes() {
       <img src="${shoe.image}" alt="${shoe.name}" />
       <h3>${shoe.name}</h3>
       <p>$${shoe.price}</p>
+      <button class="wishlist-btn" onclick="toggleWishlist('${shoe.name}')">
+        ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
+      </button>
     `;
-    card.onclick = () => showDetails(shoe); // Show modal on click
+    card.onclick = () => showDetails(shoe);
     results.appendChild(card);
   });
 }
 
-// Function to show detailed info of a selected shoe in a modal popup
 function showDetails(shoe) {
   const modal = document.getElementById('modal');
   const content = document.getElementById('modal-content');
@@ -103,12 +99,61 @@ function showDetails(shoe) {
   modal.style.display = 'flex';
 }
 
-// Function to close the modal popup
 function closeModal() {
   document.getElementById('modal').style.display = 'none';
 }
 
-// Toggle light/dark mode
+// Wishlist functions
+function getWishlist() {
+  return JSON.parse(localStorage.getItem('wishlist')) || [];
+}
+
+function isInWishlist(name) {
+  const wishlist = getWishlist();
+  return wishlist.includes(name);
+}
+
+function toggleWishlist(name) {
+  let wishlist = getWishlist();
+  const index = wishlist.indexOf(name);
+  if (index !== -1) {
+    wishlist.splice(index, 1);
+  } else {
+    wishlist.push(name);
+  }
+  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  searchShoes();
+}
+
+function showWishlist() {
+  const wishlist = getWishlist();
+  const results = document.getElementById('results');
+  results.innerHTML = '';
+
+  const favoritedShoes = shoeData.filter(shoe => wishlist.includes(shoe.name));
+
+  if (favoritedShoes.length === 0) {
+    results.innerHTML = '<p>Your wishlist is empty.</p>';
+    return;
+  }
+
+  favoritedShoes.forEach(shoe => {
+    const card = document.createElement('div');
+    card.className = 'shoe-card';
+    card.innerHTML = `
+      <img src="${shoe.image}" alt="${shoe.name}" />
+      <h3>${shoe.name}</h3>
+      <p>$${shoe.price}</p>
+      <button class="wishlist-btn" onclick="toggleWishlist('${shoe.name}')">
+        ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
+      </button>
+    `;
+    card.onclick = () => showDetails(shoe);
+    results.appendChild(card);
+  });
+}
+
+// Theme toggle
 function toggleTheme() {
   const body = document.body;
   const icon = document.getElementById('theme-icon');
@@ -126,7 +171,6 @@ function toggleTheme() {
   }
 }
 
-// Load saved theme preference and insert toggle button with icon
 window.onload = () => {
   const body = document.body;
   const savedTheme = localStorage.getItem('theme');
@@ -141,7 +185,6 @@ window.onload = () => {
   toggleBtn.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
   toggleBtn.onclick = toggleTheme;
 
-  // Create wrapper for positioning toggle theme button in top right
   const wrapper = document.createElement('div');
   wrapper.style.position = 'absolute';
   wrapper.style.top = '10px';
