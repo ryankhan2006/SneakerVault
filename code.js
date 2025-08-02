@@ -78,7 +78,7 @@ function searchShoes() {
       <img src="${shoe.image}" alt="${shoe.name}" />
       <h3>${shoe.name}</h3>
       <p>$${shoe.price}</p>
-      <button class="wishlist-btn" onclick="toggleWishlist('${shoe.name}')">
+      <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.name}')">
         ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
       </button>
     `;
@@ -144,7 +144,7 @@ function showWishlist() {
       <img src="${shoe.image}" alt="${shoe.name}" />
       <h3>${shoe.name}</h3>
       <p>$${shoe.price}</p>
-      <button class="wishlist-btn" onclick="toggleWishlist('${shoe.name}')">
+      <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.name}')">
         ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
       </button>
     `;
