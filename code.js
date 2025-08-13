@@ -71,7 +71,7 @@
       },
       {
         name: 'Reebok Nano X2',
-        category: 'Training',
+        category: 'Casual',
         brand: 'Reebok',
         audience: 'Women',
         price: 130,
@@ -80,19 +80,53 @@
       }
     ];
 
+    function getCheckedValues(containerId) {
+      return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(input => input.value);
+    }
+
+    function toggleDropdown(id) {
+      const allDropdowns = document.querySelectorAll('.dropdown-content');
+      allDropdowns.forEach(dropdown => {
+        if (dropdown.id !== id) {
+          dropdown.style.display = 'none';
+        }
+      });
+
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', function(event) {
+      const isDropdown = event.target.closest('.dropdown');
+      if (!isDropdown) {
+        document.querySelectorAll('.dropdown-content').forEach(el => el.style.display = 'none');
+      }
+      });
+
+    document.querySelectorAll('.dropdown-content input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', searchShoes);
+      });
+
+    function clearFilters() {
+      document.querySelectorAll('.dropdown-content input:checked').forEach(cb => cb.checked = false);
+      document.getElementById('sort').value = '';
+      searchShoes();
+    }
+
     function searchShoes() {
-      const category = document.getElementById('category').value;
-      const brand = document.getElementById('brand').value;
-      const audience = document.getElementById('audience').value;
+      const selectedCategories = getCheckedValues('category-options');
+      const selectedBrands = getCheckedValues('brand-options');
+      const selectedAudiences = getCheckedValues('audience-options');
       const sort = document.getElementById('sort').value;
       const results = document.getElementById('results');
       results.innerHTML = '';
 
       let filtered = shoeData.filter(shoe => {
-        return (!category || shoe.category === category) &&
-               (!brand || shoe.brand === brand) &&
-               (!audience || shoe.audience === audience);
-      });
+      const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(shoe.category);
+      const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(shoe.brand);
+      const audienceMatch = selectedAudiences.length === 0 || selectedAudiences.includes(shoe.audience);
+      return categoryMatch && brandMatch && audienceMatch;
+  });
 
       if (sort === 'Low-High') {
         filtered.sort((a, b) => a.price - b.price);
@@ -115,12 +149,12 @@
           <img src="${shoe.image}" alt="${shoe.name}" onerror="this.innerHTML='${shoe.name}'" />
           <h3>${shoe.name}</h3>
           <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">${shoe.brand} • ${shoe.category}</p>
-          <p style="font-size: 1.2rem; font-weight: bold; color: #007aff;">$${shoe.price}</p>
-        `;
+          <p style="font-size: 1.2rem; font-weight: bold; color: #007aff;">$${shoe.price}</p>`;
         card.onclick = () => showDetails(shoe);
         results.appendChild(card);
-      });
-    }
+  });
+}
+
 
     function showDetails(shoe) {
       const modal = document.getElementById('modal');
@@ -247,11 +281,14 @@
       searchShoes(); // Load all shoes initially
     };
 
-    // Add event listeners to filters for auto-search
-    document.getElementById('category').addEventListener('change', searchShoes);
-    document.getElementById('brand').addEventListener('change', searchShoes);
-    document.getElementById('audience').addEventListener('change', searchShoes);
+    ['category-options', 'brand-options', 'audience-options'].forEach(id => {
+      document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(cb => {
+        cb.addEventListener('change', searchShoes);
+      });
+    });
+
     document.getElementById('sort').addEventListener('change', searchShoes);
+    
 
     // Click outside modal to close
     document.getElementById('modal').addEventListener('click', function(e) {

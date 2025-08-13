@@ -13,44 +13,68 @@
   </div>
 
   <header>SneakerVault</header>
-  
+
   <div class="filter-box">
-    <select id="category">
-      <option value="">Select Category</option>
-      <option value="Casual">Casual</option>
-      <option value="Basketball">Basketball</option>
-      <option value="Soccer">Soccer</option>
-    </select>
-    <select id="brand">
-      <option value="">Select Brand</option>
-      <option value="Nike">Nike</option>
-      <option value="Adidas">Adidas</option>
-      <option value="Reebok">Reebok</option>
-      <option value="New Balance">New Balance</option>
-    </select>
-    <select id="audience">
-      <option value="">Select Audience</option>
-      <option value="Men">Men</option>
-      <option value="Women">Women</option>
-      <option value="Kids">Kids</option>
-    </select>
+    <!-- CATEGORY -->
+    <div class="dropdown-group">
+      <label for="category-options">Category</label>
+      <div class="dropdown">
+        <button class="dropdown-btn" onclick="toggleDropdown('category-options')">Select</button>
+        <div class="dropdown-content" id="category-options">
+          <label><input type="checkbox" value="Casual"> Casual</label>
+          <label><input type="checkbox" value="Basketball"> Basketball</label>
+          <label><input type="checkbox" value="Soccer"> Soccer</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRAND -->
+    <div class="dropdown-group">
+      <label for="brand-options">Brand</label>
+      <div class="dropdown">
+        <button class="dropdown-btn" onclick="toggleDropdown('brand-options')">Select</button>
+        <div class="dropdown-content" id="brand-options">
+          <label><input type="checkbox" value="Nike"> Nike</label>
+          <label><input type="checkbox" value="Adidas"> Adidas</label>
+          <label><input type="checkbox" value="Reebok"> Reebok</label>
+          <label><input type="checkbox" value="New Balance"> New Balance</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIENCE -->
+    <div class="dropdown-group">
+      <label for="audience-options">Audience</label>
+      <div class="dropdown">
+        <button class="dropdown-btn" onclick="toggleDropdown('audience-options')">Select</button>
+        <div class="dropdown-content" id="audience-options">
+          <label><input type="checkbox" value="Men"> Men</label>
+          <label><input type="checkbox" value="Women"> Women</label>
+          <label><input type="checkbox" value="Kids"> Kids</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SORT -->
     <select id="sort">
       <option value="">Sort by Price</option>
       <option value="Low-High">Low to High</option>
       <option value="High-Low">High to Low</option>
     </select>
-    <button onclick="searchShoes()">Search</button>
+
+    <!-- BUTTONS -->
     <button onclick="clearFilters()">Clear Filters</button>
   </div>
 
+  <!-- RESULTS -->
   <div class="results" id="results"></div>
 
+  <!-- MODAL -->
   <div class="modal" id="modal">
     <div class="modal-content" id="modal-content"></div>
     <button class="close-btn" onclick="closeModal()">Close</button>
-     </div>
+  </div>
 
-    <script src="code.js"></script>
-
+  <script src="code.js"></script>
 </body>
 </html>
