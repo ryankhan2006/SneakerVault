@@ -155,7 +155,6 @@
   });
 }
 
-
     function showDetails(shoe) {
       const modal = document.getElementById('modal');
       const content = document.getElementById('modal-content');
@@ -181,14 +180,6 @@
 
     function closeModal() {
       document.getElementById('modal').style.display = 'none';
-    }
-
-    function clearFilters() {
-      document.getElementById('category').value = '';
-      document.getElementById('brand').value = '';
-      document.getElementById('audience').value = '';
-      document.getElementById('sort').value = '';
-      searchShoes();
     }
 
     // Wishlist functions using in-memory storage
