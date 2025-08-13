@@ -7,7 +7,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="controls-wrapper">
+    <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+    <button class="wishlist-toggle" onclick="showWishlist()" title="View Wishlist">💖</button>
+  </div>
+
   <header>SneakerVault</header>
+  
   <div class="filter-box">
     <select id="category">
       <option value="">Select Category</option>
@@ -34,6 +40,7 @@
       <option value="High-Low">High to Low</option>
     </select>
     <button onclick="searchShoes()">Search</button>
+    <button onclick="clearFilters()">Clear Filters</button>
   </div>
 
   <div class="results" id="results"></div>
@@ -41,8 +48,9 @@
   <div class="modal" id="modal">
     <div class="modal-content" id="modal-content"></div>
     <button class="close-btn" onclick="closeModal()">Close</button>
-  </div>
+     </div>
 
-  <script src="code.js"></script>
+    <script src="code.js"></script>
+
 </body>
 </html>
