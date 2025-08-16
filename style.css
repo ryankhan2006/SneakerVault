@@ -649,3 +649,13 @@ body.dark-mode .wishlist-btn:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
+
+select option {
+  color: #000;
+  background: #fff;
+}
+
+body.dark-mode select option {
+  color: #fff;
+  background: #2c3e50;
+}
