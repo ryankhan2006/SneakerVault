@@ -5,81 +5,28 @@
       reviews: {} // Store reviews by shoe name
     };
 
-    // Sneaker data with category, brand, audience, and price
-    const shoeData = [
-      {
-        name: 'Nike Air Force 1',
-        category: 'Casual',
-        brand: 'Nike',
-        audience: 'Men',
-        price: 100,
-        image: 'https://via.placeholder.com/200x150/667eea/white?text=Nike+Air+Force+1',
-        description: 'Classic and clean casual sneaker perfect for everyday wear. Features premium leather upper and iconic Air-Sole unit for lightweight cushioning.'
-      },
-      {
-        name: 'Adidas Harden Vol. 6',
-        category: 'Basketball',
-        brand: 'Adidas',
-        audience: 'Men',
-        price: 140,
-        image: 'https://via.placeholder.com/200x150/ff6b6b/white?text=Adidas+Harden',
-        description: 'Performance basketball shoe with responsive cushioning and grip. Designed for explosive movements and superior court control.'
-      },
-      {
-        name: 'Reebok Club C 85',
-        category: 'Casual',
-        brand: 'Reebok',
-        audience: 'Women',
-        price: 75,
-        image: 'https://via.placeholder.com/200x150/4ecdc4/white?text=Reebok+Club+C',
-        description: 'Minimalist and retro sneaker suitable for casual outfits. Clean court-inspired design with premium leather construction.'
-      },
-      {
-        name: 'New Balance 990v5',
-        category: 'Casual',
-        brand: 'New Balance',
-        audience: 'Kids',
-        price: 90,
-        image: 'https://via.placeholder.com/200x150/45b7d1/white?text=New+Balance+990',
-        description: 'Premium comfort and durability. Made in USA classic model with superior cushioning and breathable mesh upper.'
-      },
-      {
-        name: 'Nike Mercurial Vapor',
-        category: 'Soccer',
-        brand: 'Nike',
-        audience: 'Men',
-        price: 120,
-        image: 'https://via.placeholder.com/200x150/f39c12/white?text=Nike+Mercurial',
-        description: 'Lightweight soccer cleats built for speed and control. Features innovative traction pattern for optimal performance on the field.'
-      },
-      {
-        name: 'Adidas Stan Smith',
-        category: 'Casual',
-        brand: 'Adidas',
-        audience: 'Women',
-        price: 85,
-        image: 'https://via.placeholder.com/200x150/27ae60/white?text=Stan+Smith',
-        description: 'Iconic tennis shoe with timeless appeal. Clean white leather design with signature green accents.'
-      },
-      {
-        name: 'Nike LeBron 20',
-        category: 'Basketball',
-        brand: 'Nike',
-        audience: 'Men',
-        price: 200,
-        image: 'https://via.placeholder.com/200x150/e74c3c/white?text=LeBron+20',
-        description: 'Elite basketball performance with responsive Zoom Air units. Built for power players who dominate the court.'
-      },
-      {
-        name: 'Reebok Nano X2',
-        category: 'Casual',
-        brand: 'Reebok',
-        audience: 'Women',
-        price: 130,
-        image: 'https://via.placeholder.com/200x150/9b59b6/white?text=Nano+X2',
-        description: 'Versatile training shoe designed for cross-training and gym workouts. Superior stability and flexibility.'
-      }
-    ];
+    // Sneaker data with category, brand, audience, and price from csv file
+    function loadCSVDData() {
+      Papa.parse('shoedata.csv', {
+        download: true,
+        header: true,
+        complete: function(results) {
+          shoeData = results.data.map(row => ({
+            name: row['Name'],
+            category: row['Category'],
+            brand: row['Brand'],
+            audience: row['Audience'],
+            price: parseFloat(row['Price USD']),
+            image: row['Image Link'],
+            description: row['Description']
+          }));
+          searchShoes(); // Initial search to display all shoes
+        },
+        error: function(err) {
+          console.error('Error loading CSV data:', err);
+        }
+      });
+    }
 
     function getCheckedValues(containerId) {
       return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(input => input.value);
@@ -512,7 +459,7 @@
 
     // Initialize app
     window.onload = () => {
-      searchShoes(); // Load all shoes initially
+      loadCSVDData(); // Load all shoes initially
     };
 
     ['category-options', 'brand-options', 'audience-options'].forEach(id => {
