@@ -12,6 +12,12 @@ let appState = {
 // Global variable to track selected rating - THIS IS THE KEY FIX
 let currentSelectedRating = 0;
 
+// Creates safe and unique ids when loading data from CSV
+function makeSafeId(row, idx) {
+  const raw = `${(row['Image Link']||'').trim()}|${(row['Name']||'').trim()}|${(row['Color']||'').trim()}|${idx}`;
+  return 'sh_' + encodeURIComponent(raw);
+}
+
 // Sneaker data with category, brand, audience, and price from csv file
 function loadCSVDData() {
   Papa.parse('shoedata.csv', {
@@ -20,7 +26,8 @@ function loadCSVDData() {
     complete: function(results) {
       shoeData = results.data
       .filter(row => row['Name'] && row['Category'] && row['Brand'] && row['Audience'] && row['Price USD'] && row['Image Link'] && row['Description']) // Ensure essential fields are present
-      .map(row => ({
+      .map((row, idx) => ({
+        id: makeSafeId(row, idx), // Unique ID based on image link, name, and color
         name: row['Name'],
         category: row['Category'],
         brand: row['Brand'],
@@ -200,6 +207,7 @@ function searchShoes() {
 
 function renderPaginatedShoes() {
   const results = document.getElementById("results");
+  results.dataset.view = 'browse';
   results.innerHTML = "";
 
   const start = (currentPage - 1) * itemsPerPage;
@@ -343,16 +351,30 @@ function showDetails(shoe) {
       <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Customer Reviews</h3>
       <div id="reviews-list">${renderReviews(reviews)}</div>
     </div>
-    
-    <button onclick="toggleWishlist('${shoe.name}'); showDetails(${JSON.stringify(shoe).replace(/"/g, '&quot;')})" 
-            style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: ${isInWishlist(shoe.name) ? '#e74c3c' : '#007aff'}; color: white; border: none; border-radius: 6px; cursor: pointer;">
-      ${isInWishlist(shoe.name) ? '❤️ Remove from Wishlist' : '🤍 Add to Wishlist'}
+
+    <button id="wishlist-btn" type="button"
+            style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: ${isInWishlist(shoe.id) ? '#e74c3c' : '#007aff'}; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      ${isInWishlist(shoe.id) ? '❤️ Remove from Wishlist' : '🤍 Add to Wishlist'}
     </button>
   `;
   modal.style.display = 'flex';
+
+  const wishBtn = content.querySelector('#wishlist-btn');
+  if (wishBtn) {
+    wishBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Ensure id exists check (Even though it should with makeSafeId function)
+      if (!shoe.id) {
+        shoe.id = 'sh_fallback_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); 
+      }
+      toggleWishlist(shoe.id);
+
+      showDetails(shoe); // Refresh modal to update button state
   
   // Setup interactive star rating after modal is displayed
   setTimeout(() => setupStarRating('star-rating'), 100);
+});
+  }
 }
 
 function renderReviews(reviews) {
@@ -411,22 +433,22 @@ function getWishlist() {
   return appState.wishlist;
 }
 
-function isInWishlist(name) {
-  const wishlist = getWishlist();
-  return wishlist.includes(name);
+function isInWishlist(id) {
+  return getWishlist().includes(id);
 }
 
-function toggleWishlist(name) {
-  let wishlist = getWishlist();
-  const index = wishlist.indexOf(name);
+function toggleWishlist(id) {
+  const wishlist = getWishlist();
+  const index = wishlist.indexOf(id);
   if (index !== -1) {
     wishlist.splice(index, 1);
   } else {
-    wishlist.push(name);
+    wishlist.push(id);
   }
   // Re-render current view
   const results = document.getElementById('results');
-  if (results.innerHTML.includes('Your wishlist')) {
+  const view = results.dataset.view || 'browse';
+  if (view === 'wishlist') {
     showWishlist();
   } else {
     searchShoes();
@@ -437,11 +459,19 @@ function showWishlist() {
   const wishlist = getWishlist();
   const results = document.getElementById('results');
   results.innerHTML = '';
+  results.dataset.view = 'wishlist';
 
-  const favoritedShoes = shoeData.filter(shoe => wishlist.includes(shoe.name));
+  let favoritedShoes = shoeData.filter(shoe => wishlist.includes(shoe.id));
+
+  const sort = document.getElementById('sort').value;
+  if (sort === 'Low-High') {
+    favoritedShoes.sort((a, b) => a.price - b.price);
+  } else if (sort === 'High-Low') {
+    favoritedShoes.sort((a, b) => b.price - a.price);
+  }
 
   if (favoritedShoes.length === 0) {
-    results.innerHTML = '<div class="no-results">Your wishlist is empty. ❤️<br><button onclick="searchShoes()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007aff; color: white; border: none; border-radius: 6px; cursor: pointer;">Browse Sneakers</button></div>';
+    results.innerHTML = '<div class="no-results">Your wishlist is empty. ❤️<br><button onclick="clearFilters()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007aff; color: white; border: none; border-radius: 6px; cursor: pointer;">Browse Sneakers</button></div>';
     return;
   }
 
@@ -452,7 +482,7 @@ function showWishlist() {
   header.style.marginBottom = '1rem';
   header.innerHTML = `
     <h2 style="color: #007aff; margin-bottom: 0.5rem;">💖 Your Wishlist (${favoritedShoes.length})</h2>
-    <button onclick="searchShoes()" style="padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;">← Back to Browse</button>
+    <button onclick="clearFilters()" style="padding: 0.5rem 1rem; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;">← Back to Browse</button>
   `;
   results.appendChild(header);
 
@@ -463,8 +493,8 @@ function showWishlist() {
     const card = document.createElement('div');
     card.className = 'shoe-card';
     card.innerHTML = `
-      <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.name}')">
-        ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
+      <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.id}')">
+        ${isInWishlist(shoe.id) ? '❤️' : '🤍'}
       </button>
       <img src="${shoe.image}" alt="${shoe.name}" onerror="this.innerHTML='${shoe.name}'" />
       <h3>${shoe.name}</h3>
@@ -509,7 +539,14 @@ window.onload = () => {
   });
 });
 
-document.getElementById('sort').addEventListener('change', searchShoes);
+document.getElementById('sort').addEventListener('change', () => {
+  const view = document.getElementById('results').dataset.view || 'browse';
+  if (view === 'wishlist') {
+    showWishlist();
+  } else {
+    searchShoes();
+  }
+});
 
 // Click outside modal to close
 document.getElementById('modal').addEventListener('click', function(e) {
