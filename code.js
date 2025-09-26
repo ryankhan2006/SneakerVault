@@ -1,3 +1,7 @@
+let currentPage = 1;
+const itemsPerPage = 20;
+let filteredShoes = [];
+
 // In-memory storage instead of localStorage
 let appState = {
   wishlist: [],
@@ -14,15 +18,20 @@ function loadCSVDData() {
     download: true,
     header: true,
     complete: function(results) {
-      shoeData = results.data.map(row => ({
+      shoeData = results.data
+      .filter(row => row['Name'] && row['Category'] && row['Brand'] && row['Audience'] && row['Price USD'] && row['Image Link'] && row['Description']) // Ensure essential fields are present
+      .map(row => ({
         name: row['Name'],
         category: row['Category'],
         brand: row['Brand'],
+        color: row['Color'],
         audience: row['Audience'],
         price: parseFloat(row['Price USD']),
         image: row['Image Link'],
         description: row['Description']
       }));
+
+      populateColorDropdown(shoeData); // Populate color dropdown dynamically
       searchShoes(); // Initial search to display all shoes
     },
     error: function(err) {
@@ -30,6 +39,29 @@ function loadCSVDData() {
     }
   });
 }
+
+function populateColorDropdown(data) {
+  const colorSet = new Set();
+  data.forEach(shoe => {
+    const color = shoe.color?.trim();
+    if (color) colorSet.add(color);
+  });
+
+  const colorOptionsContainer = document.getElementById('color-options');
+  colorOptionsContainer.innerHTML = ''; // Clear any old values
+
+  Array.from(colorSet).sort().forEach(color => {
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="checkbox" value="${color}"> ${color}`;
+    colorOptionsContainer.appendChild(label);
+  });
+
+  // Attach event listeners
+  document.querySelectorAll('#color-options input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', searchShoes);
+  });
+}
+
 
 function getCheckedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(input => input.value);
@@ -134,8 +166,10 @@ function clearFilters() {
 }
 
 function searchShoes() {
+  currentPage = 1; // Reset to first page on new search
   const selectedCategories = getCheckedValues('category-options');
   const selectedBrands = getCheckedValues('brand-options');
+  const selectedColors = getCheckedValues('color-options');
   const selectedAudiences = getCheckedValues('audience-options');
   const sort = document.getElementById('sort').value;
   const results = document.getElementById('results');
@@ -144,8 +178,9 @@ function searchShoes() {
   let filtered = shoeData.filter(shoe => {
     const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(shoe.category);
     const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(shoe.brand);
+    const colorMatch = selectedColors.length === 0 || selectedColors.includes(shoe.color);
     const audienceMatch = selectedAudiences.length === 0 || selectedAudiences.includes(shoe.audience);
-    return categoryMatch && brandMatch && audienceMatch;
+    return categoryMatch && brandMatch && colorMatch && audienceMatch;
   });
 
   if (sort === 'Low-High') {
@@ -159,27 +194,102 @@ function searchShoes() {
     return;
   }
 
-  filtered.forEach(shoe => {
-    const avgRating = getAverageRating(shoe.name);
-    const reviewCount = getShoeReviews(shoe.name).length;
-    
-    const card = document.createElement('div');
-    card.className = 'shoe-card';
+  filteredShoes = filtered; // Store for pagination
+  renderPaginatedShoes();
+}
+
+function renderPaginatedShoes() {
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const paginatedShoes = filteredShoes.slice(start, end);
+
+  if (paginatedShoes.length === 0) {
+    results.innerHTML = "<div class='no-results'>No shoes found.</div>";
+    document.getElementById("pagination").innerHTML = "";
+    return;
+  }
+
+  paginatedShoes.forEach(shoe => {
+    const card = document.createElement("div");
+    card.className = "shoe-card";
     card.innerHTML = `
-      <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${shoe.name}')">
-        ${isInWishlist(shoe.name) ? '❤️' : '🤍'}
-      </button>
-      <img src="${shoe.image}" alt="${shoe.name}" onerror="this.innerHTML='${shoe.name}'" />
+      <img src="${shoe.image}" alt="${shoe.name}" onerror="this.src='fallback.jpg'" />
       <h3>${shoe.name}</h3>
-      <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">${shoe.brand} • ${shoe.category}</p>
-      <div style="display: flex; align-items: center; justify-content: center; margin: 0.5rem 0;">
-        ${avgRating > 0 ? renderStars(avgRating, false, '1rem') : '<span style="color: #999; font-size: 0.9rem;">No reviews yet</span>'}
-        ${avgRating > 0 ? `<span style="margin-left: 0.5rem; font-size: 0.9rem; color: #666;">${avgRating} (${reviewCount})</span>` : ''}
-      </div>
-      <p style="font-size: 1.2rem; font-weight: bold; color: #007aff;">$${shoe.price}</p>`;
+      <p><strong>Brand:</strong> ${shoe.brand}</p>
+      <p><strong>Category:</strong> ${shoe.category}</p>
+      <p><strong>Price:</strong> $${shoe.price.toFixed(2)}</p>
+    `;
+
     card.onclick = () => showDetails(shoe);
+
     results.appendChild(card);
   });
+
+  renderPaginationControls();
+}
+
+function renderPaginationControls() {
+  const pagination = document.getElementById("pagination-controls");
+  pagination.innerHTML = "";
+
+  const totalPages = Math.ceil(filteredShoes.length / itemsPerPage);
+  if (totalPages <= 1) return;
+
+  const createPageButton = (pageNum) => {
+    const btn = document.createElement("button");
+    btn.textContent = pageNum;
+    if (pageNum === currentPage) btn.disabled = true;
+    btn.onclick = () => {
+      currentPage = pageNum;
+      renderPaginatedShoes();
+    };
+    return btn;
+  };
+
+  const addEllipsis = () => {
+    const span = document.createElement("span");
+    span.textContent = "...";
+    span.className = "pagination-ellipsis";
+    pagination.appendChild(span);
+  };
+
+  const prev = document.createElement("button");
+  prev.textContent = "« Prev";
+  prev.disabled = currentPage === 1;
+  prev.onclick = () => {
+    currentPage--;
+    renderPaginatedShoes();
+  };
+  pagination.appendChild(prev);
+
+  pagination.appendChild(createPageButton(1));
+
+  if (currentPage > 4) addEllipsis();
+
+  const start = Math.max(2, currentPage - 2);
+  const end = Math.min(totalPages - 1, currentPage + 2);
+
+  for (let i = start; i <= end; i++) {
+    pagination.appendChild(createPageButton(i));
+  }
+
+  if (currentPage < totalPages - 3) addEllipsis();
+
+  if (totalPages > 1) {
+    pagination.appendChild(createPageButton(totalPages));
+  }
+
+  const next = document.createElement("button");
+  next.textContent = "Next »";
+  next.disabled = currentPage === totalPages;
+  next.onclick = () => {
+    currentPage++;
+    renderPaginatedShoes();
+  };
+  pagination.appendChild(next);
 }
 
 function showDetails(shoe) {

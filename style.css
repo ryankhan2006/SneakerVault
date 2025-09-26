@@ -659,3 +659,39 @@ body.dark-mode select option {
   color: #fff;
   background: #2c3e50;
 }
+
+.pagination-controls {
+  text-align: center;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pagination-controls button {
+  margin: 0 5px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-controls button:hover {
+  background: #667eea;
+  color: white;
+}
+
+.pagination-controls button:disabled {
+  background: #e0e0e0;
+  color: #888;
+  border-color: #ccc;
+  cursor: default;
+}
+
+.pagination-ellipsis {
+  margin: 0 6px;
+  font-weight: bold;
+  color: #888;
+}
