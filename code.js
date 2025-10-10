@@ -2,6 +2,7 @@ let currentPage = 1;
 const itemsPerPage = 20;
 let filteredShoes = [];
 
+
 // In-memory storage instead of localStorage
 let appState = {
   wishlist: [],
@@ -20,54 +21,73 @@ function makeSafeId(row, idx) {
 
 // Sneaker data with category, brand, audience, and price from csv file
 function loadCSVDData() {
-  Papa.parse('shoedata.csv', {
+  Papa.parse("newshoedata.csv", {
     download: true,
     header: true,
-    complete: function(results) {
-      shoeData = results.data
-      .filter(row => row['Name'] && row['Category'] && row['Brand'] && row['Audience'] && row['Price USD'] && row['Image Link'] && row['Description']) // Ensure essential fields are present
-      .map((row, idx) => ({
-        id: makeSafeId(row, idx), // Unique ID based on image link, name, and color
-        name: row['Name'],
-        category: row['Category'],
-        brand: row['Brand'],
-        color: row['Color'],
-        audience: row['Audience'],
-        price: parseFloat(row['Price USD']),
-        image: row['Image Link'],
-        description: row['Description']
-      }));
+    skipEmptyLines: true,
+    complete: function (results) {
+      shoeData = results.data.map((row, idx) => {
+        const fixed = {};
+        for (const key in row) {
+          const cleanKey = key.trim().replace(/[\uFEFF\r\n]+/g, "");
+          fixed[cleanKey] = (row[key] || "").trim();
+        }
 
-      populateColorDropdown(shoeData); // Populate color dropdown dynamically
-      searchShoes(); // Initial search to display all shoes
+        return {
+          id: makeSafeId(fixed, idx),
+          name: fixed["Name"],
+          category: fixed["Category"],
+          brand: fixed["Brand"],
+          audience: fixed["Audience"],
+          price: parseFloat(fixed["Price USD"]),
+          image: fixed["Image Link"],
+          description: fixed["Description"],
+          color: (fixed["Color"] || "")
+            .split("/")
+            .map((c) => c.trim())
+            .filter((c) => c),
+          genericColors: (fixed["Generic Colors"] || "")
+            .split("/")
+            .map((c) => c.trim())
+            .filter((c) => c),
+        };
+      });
+
+      populateColorDropdown(shoeData);
+      searchShoes();
     },
-    error: function(err) {
-      console.error('Error loading CSV data:', err);
-    }
   });
 }
+
 
 function populateColorDropdown(data) {
   const colorSet = new Set();
-  data.forEach(shoe => {
-    const color = shoe.color?.trim();
-    if (color) colorSet.add(color);
+
+  data.forEach((shoe) => {
+    (shoe.genericColors || []).forEach((color) => {
+      if (color) colorSet.add(color);
+    });
   });
 
-  const colorOptionsContainer = document.getElementById('color-options');
-  colorOptionsContainer.innerHTML = ''; // Clear any old values
+  const container = document.getElementById("color-options");
+  container.innerHTML = "";
 
-  Array.from(colorSet).sort().forEach(color => {
-    const label = document.createElement('label');
-    label.innerHTML = `<input type="checkbox" value="${color}"> ${color}`;
-    colorOptionsContainer.appendChild(label);
-  });
+  Array.from(colorSet)
+    .sort((a, b) => a.localeCompare(b))
+    .forEach((color) => {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = color;
+      input.addEventListener("change", searchShoes);
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(" " + color));
+      container.appendChild(label);
+    });
 
-  // Attach event listeners
-  document.querySelectorAll('#color-options input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', searchShoes);
-  });
 }
+
+
 
 
 function getCheckedValues(containerId) {
@@ -185,7 +205,11 @@ function searchShoes() {
   let filtered = shoeData.filter(shoe => {
     const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(shoe.category);
     const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(shoe.brand);
-    const colorMatch = selectedColors.length === 0 || selectedColors.includes(shoe.color);
+    const colorMatch =
+  selectedColors.length === 0 ||
+  (Array.isArray(shoe.genericColors) &&
+    shoe.genericColors.some((c) => selectedColors.includes(c)));
+
     const audienceMatch = selectedAudiences.length === 0 || selectedAudiences.includes(shoe.audience);
     return categoryMatch && brandMatch && colorMatch && audienceMatch;
   });
@@ -533,11 +557,6 @@ window.onload = () => {
   loadCSVDData(); // Load all shoes initially
 };
 
-['category-options', 'brand-options', 'audience-options'].forEach(id => {
-  document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(cb => {
-    cb.addEventListener('change', searchShoes);
-  });
-});
 
 document.getElementById('sort').addEventListener('change', () => {
   const view = document.getElementById('results').dataset.view || 'browse';
