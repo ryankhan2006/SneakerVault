@@ -7,9 +7,32 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="sneakerbot-chat-container"></div>
   <div class="controls-wrapper">
     <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
     <button class="wishlist-toggle" onclick="showWishlist()" title="View Wishlist">💖</button>
+    <button class="chatbot-toggle" onclick="toggleChatbot()" title="Chat with SneakerBot">💬</button>
+  </div>
+
+  <!-- SneakerBot Chatbot Widget -->
+  <div class="chatbot-widget" id="chatbot-widget">
+    <div class="chatbot-header">
+      <span class="chatbot-title">👟 SneakerBot</span>
+      <button class="chatbot-minimize" onclick="toggleChatbot()">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages">
+      <div class="chatbot-welcome">
+        <p><strong>Hi! I'm SneakerBot 👟</strong></p>
+        <p>Ask me to find sneakers by brand, color, or price!</p>
+        <p class="chatbot-examples">
+          Try: "Show me Nike under $150" or "Find black Adidas"
+        </p>
+      </div>
+    </div>
+    <div class="chatbot-input-container">
+      <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask about sneakers..." autocomplete="off">
+      <button class="chatbot-send" onclick="sendChatMessage()">Send</button>
+    </div>
   </div>
 
   <header>SneakerVault</header>
@@ -118,4 +141,5 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="code.js"></script>
 </body>
+
 </html>
