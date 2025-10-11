@@ -792,3 +792,12 @@ document.getElementById('chatbot-input').addEventListener('keypress', (e) => {
     sendChatMessage();
   }
 });
+
+// Make example chips clickable
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('example-chip')) {
+    const input = document.getElementById('chatbot-input');
+    input.value = e.target.textContent.replace(/"/g, '');
+    sendChatMessage();
+  }
+});

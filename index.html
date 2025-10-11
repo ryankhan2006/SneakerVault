@@ -7,31 +7,55 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="sneakerbot-chat-container"></div>
   <div class="controls-wrapper">
     <button class="theme-toggle" id="theme-icon" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
     <button class="wishlist-toggle" onclick="showWishlist()" title="View Wishlist">💖</button>
-    <button class="chatbot-toggle" onclick="toggleChatbot()" title="Chat with SneakerBot">💬</button>
   </div>
+
+  <!-- Floating Chat Bubble Button -->
+  <button class="chat-bubble-btn" id="chat-bubble-btn" onclick="toggleChatbot()" title="Chat with SneakerBot">
+    <svg class="chat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor"/>
+      <circle cx="12" cy="10" r="1.5" fill="white"/>
+      <circle cx="8" cy="10" r="1.5" fill="white"/>
+      <circle cx="16" cy="10" r="1.5" fill="white"/>
+    </svg>
+    <span class="chat-badge" id="chat-badge">💬</span>
+  </button>
 
   <!-- SneakerBot Chatbot Widget -->
   <div class="chatbot-widget" id="chatbot-widget">
     <div class="chatbot-header">
-      <span class="chatbot-title">👟 SneakerBot</span>
-      <button class="chatbot-minimize" onclick="toggleChatbot()">×</button>
+      <div class="chatbot-title-wrapper">
+        <span class="chatbot-title">👟 SneakerBot Assistant</span>
+        <span class="chatbot-status">● Online</span>
+      </div>
+      <button class="chatbot-minimize" onclick="toggleChatbot()">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     <div class="chatbot-messages" id="chatbot-messages">
       <div class="chatbot-welcome">
-        <p><strong>Hi! I'm SneakerBot 👟</strong></p>
-        <p>Ask me to find sneakers by brand, color, or price!</p>
-        <p class="chatbot-examples">
-          Try: "Show me Nike under $150" or "Find black Adidas"
-        </p>
+        <div class="welcome-icon">👟</div>
+        <p><strong>Welcome to SneakerBot!</strong></p>
+        <p>I'm your personal sneaker shopping assistant. Ask me anything about sneakers!</p>
+        <div class="chatbot-examples">
+          <div class="example-chip">"Show me Nike under $150"</div>
+          <div class="example-chip">"Find black Adidas"</div>
+          <div class="example-chip">"Basketball shoes"</div>
+        </div>
       </div>
     </div>
     <div class="chatbot-input-container">
-      <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask about sneakers..." autocomplete="off">
-      <button class="chatbot-send" onclick="sendChatMessage()">Send</button>
+      <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message..." autocomplete="off">
+      <button class="chatbot-send" onclick="sendChatMessage()">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
     </div>
   </div>
 
