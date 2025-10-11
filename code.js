@@ -573,3 +573,222 @@ document.getElementById('modal').addEventListener('click', function(e) {
     closeModal();
   }
 });
+
+// ===== CHATBOT FUNCTIONALITY =====
+
+// Toggle chatbot widget
+function toggleChatbot() {
+  const widget = document.getElementById('chatbot-widget');
+  widget.classList.toggle('active');
+
+  // Focus input when opening
+  if (widget.classList.contains('active')) {
+    document.getElementById('chatbot-input').focus();
+  }
+}
+
+// Add message to chatbot
+function addChatMessage(text, isUser = false, products = null) {
+  const messagesContainer = document.getElementById('chatbot-messages');
+
+  // Remove welcome message on first user message
+  if (isUser && messagesContainer.querySelector('.chatbot-welcome')) {
+    messagesContainer.querySelector('.chatbot-welcome').remove();
+  }
+
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `chatbot-message ${isUser ? 'user' : 'bot'}`;
+
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'chatbot-bubble';
+  bubbleDiv.textContent = text;
+
+  messageDiv.appendChild(bubbleDiv);
+  messagesContainer.appendChild(messageDiv);
+
+  // If there are products to display, add product cards
+  if (products && products.length > 0) {
+    const productCardsDiv = document.createElement('div');
+    productCardsDiv.className = 'chatbot-product-cards';
+
+    products.slice(0, 5).forEach(product => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'chatbot-product-card';
+      cardDiv.onclick = () => showDetails(product);
+
+      cardDiv.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="chatbot-product-image" onerror="this.style.display='none'">
+        <div class="chatbot-product-info">
+          <div class="chatbot-product-name">${product.name}</div>
+          <div class="chatbot-product-brand">${product.brand}</div>
+          <div class="chatbot-product-price">$${product.price.toFixed(2)}</div>
+        </div>
+      `;
+
+      productCardsDiv.appendChild(cardDiv);
+    });
+
+    messagesContainer.appendChild(productCardsDiv);
+  }
+
+  // Scroll to bottom
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Parse user message to extract filters
+function parseChatMessage(message) {
+  const lowerMessage = message.toLowerCase();
+
+  let filters = {
+    brand: null,
+    color: null,
+    maxPrice: null,
+    category: null
+  };
+
+  // Detect brand
+  const brands = ['jordan', 'nike', 'adidas', 'puma', 'new balance', 'reebok', 'asics', 'vans', 'converse', 'under armour'];
+  for (const brand of brands) {
+    if (lowerMessage.includes(brand)) {
+      // Capitalize properly
+      if (brand === 'new balance') {
+        filters.brand = 'New Balance';
+      } else if (brand === 'under armour') {
+        filters.brand = 'Under Armour';
+      } else {
+        filters.brand = brand.charAt(0).toUpperCase() + brand.slice(1);
+      }
+      break;
+    }
+  }
+
+  // Detect color
+  const colors = ['black', 'white', 'red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange', 'brown', 'grey', 'gray'];
+  for (const color of colors) {
+    if (lowerMessage.includes(color)) {
+      filters.color = color === 'gray' ? 'grey' : color;
+      break;
+    }
+  }
+
+  // Detect price filter
+  const priceMatch = lowerMessage.match(/(?:under|less than|below|cheaper than)\s*\$?(\d+)/i);
+  if (priceMatch) {
+    filters.maxPrice = parseInt(priceMatch[1]);
+  }
+
+  // Detect category
+  const categories = ['basketball', 'running', 'lifestyle', 'training', 'soccer', 'tennis', 'skateboarding'];
+  for (const category of categories) {
+    if (lowerMessage.includes(category)) {
+      filters.category = category.charAt(0).toUpperCase() + category.slice(1);
+      break;
+    }
+  }
+
+  return filters;
+}
+
+// Filter sneakers based on chatbot criteria
+function filterChatSneakers(filters) {
+  let results = shoeData || [];
+
+  if (filters.brand) {
+    results = results.filter(s => s.brand.toLowerCase() === filters.brand.toLowerCase());
+  }
+
+  if (filters.color) {
+    results = results.filter(s => {
+      if (Array.isArray(s.genericColors)) {
+        return s.genericColors.some(c => c.toLowerCase() === filters.color.toLowerCase());
+      }
+      return false;
+    });
+  }
+
+  if (filters.maxPrice) {
+    results = results.filter(s => s.price <= filters.maxPrice);
+  }
+
+  if (filters.category) {
+    results = results.filter(s => s.category.toLowerCase() === filters.category.toLowerCase());
+  }
+
+  return results;
+}
+
+// Placeholder LLM response generator
+function generateChatbotResponse(message) {
+  const responses = [
+    "I can help you find sneakers! Try asking about specific brands like Nike, Jordan, or Adidas.",
+    "Looking for something specific? Mention a brand, color, or price range and I'll find it!",
+    "Try asking things like 'Show me Nike under $150' or 'Find black Adidas shoes'.",
+    "I specialize in sneaker searches. Tell me your brand preference, favorite color, or budget!",
+    "Let me help you find the perfect sneakers! Mention a brand, color, or price and I'll search.",
+    "Great question! I can search by brand, color, price, or category. What are you looking for?"
+  ];
+
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+
+// Send chat message
+function sendChatMessage() {
+  const input = document.getElementById('chatbot-input');
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  // Add user message
+  addChatMessage(message, true);
+
+  // Clear input
+  input.value = '';
+
+  // Parse message
+  const filters = parseChatMessage(message);
+
+  // Check if any filters were detected
+  const hasFilters = filters.brand || filters.color || filters.maxPrice || filters.category;
+
+  setTimeout(() => {
+    if (hasFilters) {
+      // Filter sneakers
+      const results = filterChatSneakers(filters);
+
+      if (results.length > 0) {
+        let responseText = `I found ${results.length} sneaker${results.length > 1 ? 's' : ''} matching your criteria`;
+
+        let filterDesc = [];
+        if (filters.brand) filterDesc.push(filters.brand);
+        if (filters.category) filterDesc.push(filters.category);
+        if (filters.color) filterDesc.push(filters.color);
+        if (filters.maxPrice) filterDesc.push(`under $${filters.maxPrice}`);
+
+        if (filterDesc.length > 0) {
+          responseText += ` (${filterDesc.join(', ')})`;
+        }
+
+        if (results.length > 5) {
+          responseText += `. Showing top 5 results:`;
+        } else {
+          responseText += `:`;
+        }
+
+        addChatMessage(responseText, false, results);
+      } else {
+        addChatMessage("Sorry, I couldn't find any sneakers matching those criteria. Try different filters!", false);
+      }
+    } else {
+      // No filters detected, use generic response
+      const llmResponse = generateChatbotResponse(message);
+      addChatMessage(llmResponse, false);
+    }
+  }, 300);
+}
+
+// Enter key to send
+document.getElementById('chatbot-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendChatMessage();
+  }
+});
