@@ -28,6 +28,7 @@
 ```
 SneakerVault/
 ├── index.html          # Main HTML file
+├── sneakerbot.html     # SneakerBot HTML file
 ├── style.css           # CSS styles
 ├── code.js             # JavaScript functionality
 ├── newshoedata.csv     # Sneaker dataset
