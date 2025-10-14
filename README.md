@@ -21,7 +21,7 @@
 - HTML
 - CSS (custom styling)
 - JavaScript (Vanilla JS logic)
-- [PapaParse](https://www.papaparse.com/) fir CSV -> JSON
+- [PapaParse](https://www.papaparse.com/) for CSV -> JSON
 
 ## 📁 Project Structure
 
