@@ -87,9 +87,6 @@ function populateColorDropdown(data) {
 
 }
 
-
-
-
 function getCheckedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(input => input.value);
 }
